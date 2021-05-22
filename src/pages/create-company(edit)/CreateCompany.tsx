@@ -233,7 +233,7 @@ const CreateCompany = () => {
                                                 }
                                                 setFieldValue("logo", event)
                                             }}
-                                                   accept="image/x-png,image/gif,image/jpeg"
+                                                   accept="image/png,image/gif,image/jpeg"
                                                    className="input-file d-none"/>
                                         </label>
                                         :
@@ -274,7 +274,7 @@ const CreateCompany = () => {
                                                 }
                                                 setFieldValue("contact.portrait", event)
                                             }}
-                                                   accept="image/x-png,image/gif,image/jpeg"
+                                                   accept="image/png, image/gif, image/jpeg"
                                                    className="input-file d-none"/>
                                         </label>
                                         :

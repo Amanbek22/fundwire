@@ -62,9 +62,24 @@ const CreateFeed = React.memo(() => {
     const [editor, setEditor] = useState<any>(EditorState?.createEmpty())
     const [pending, setPending] = useState(true)
     const [initialValue, setInitialValue] = useState<any>(initialVal)
+    const [notifications, setNotifications] = useState<string[]>([])
     const [userData] = useState(JSON.parse(localStorage.getItem('userData') as string))
+
     useEffect(() => {
+
         if (id) {
+            db.ref('/notification/feeds').once('value', (snapshot) => {
+                return snapshot.toJSON()
+            }).then((res)=>{
+                let data:any = res.toJSON()
+                const arr: Array<string> = []
+                for(let i in data){
+                    for(let j in data[i]){
+                        arr.push(data[i][j].id)
+                    }
+                }
+                setNotifications(arr)
+            })
             setStatus(`${t("assetManagerHomeScreen.feedLabel")} id: ${id}`)
             db.ref('/feeds').child(type + 's').child(id).once('value', (snapshot) => {
                 return snapshot.toJSON()
@@ -99,6 +114,7 @@ const CreateFeed = React.memo(() => {
             }, 1000)
         }
     }, [id, type, history, t])
+
     const onSubmit = async (values: FormikValues, isPublish: boolean) => {
         await db.ref('users').child(state.userData.id).once('value', (s) => {
             return s.toJSON()
@@ -110,6 +126,16 @@ const CreateFeed = React.memo(() => {
             }
             onSub(data, isPublish)
         })
+    }
+    const onNotification = (id:string) => {
+        if(!notifications.includes(id)) {
+            db.ref('/notification').child('/feeds').child(`/${type}s`).push({
+                id: id,
+                issueDate: Date.now()
+            }).then(() => {
+                history.push('/feed')
+            })
+        }
     }
     const onSub = async (values: FormikValues, isPublish: boolean) => {
         if (id) {
@@ -133,31 +159,18 @@ const CreateFeed = React.memo(() => {
                                     db.ref('/feeds').child(type + 's').child(id).child('logo').set(url)
                                         .then(() => {
                                             db.ref('/feeds').child(type + 's').child(id).child('isPublish').set(true)
-                                                .then(() => {
-                                                    db.ref('/notification').child('/feeds').child(`/${type}s`).push({
-                                                        id: id,
-                                                        issueDate: Date.now()
-                                                    }).then(() => {
-                                                        history.push('/feed')
-                                                    })
-                                                })
+                                                .then(() => onNotification(id))
                                         })
                                 })
                         })
 
                 } else {
                     db.ref('/feeds').child(type + 's').child(id).child('isPublish').set(true)
-                        .then(() => {
-                            db.ref('/notification').child('/feeds').child(`/${type}s`).push({
-                                id: id,
-                                issueDate: Date.now()
-                            }).then(() => {
-                                history.push('/feed')
-                            })
-                        })
+                        .then(() => onNotification(id))
                 }
 
-            } else {
+            }
+            else {
                 // if i am re-saving
                 if (typeof values.file === "string") {
                     let {file, ...data} = values
@@ -209,12 +222,7 @@ const CreateFeed = React.memo(() => {
                                         let newArr = arr.split('/')
                                         if (isPublish) {
                                             //create notification
-                                            db.ref('/notification').child('/feeds').child(`/${type}s`).push({
-                                                id: newArr[newArr.length - 1],
-                                                issueDate: Date.now()
-                                            }).then(() => {
-                                                history.push('/feed')
-                                            })
+                                            onNotification(newArr[newArr.length - 1])
                                         } else {
                                             history.push('/feed')
                                         }
@@ -240,12 +248,7 @@ const CreateFeed = React.memo(() => {
                     let arr: any = res.toJSON()
                     let newArr = arr.split('/')
                     if (isPublish) {
-                        db.ref('/notification').child('/feeds').child(`/${type}s`).push({
-                            id: newArr[newArr.length - 1],
-                            issueDate: Date.now()
-                        }).then(() => {
-                            history.push('/feed')
-                        })
+                        onNotification(newArr[newArr.length - 1])
                     } else {
                         history.push('/feed')
                     }
@@ -267,10 +270,18 @@ const CreateFeed = React.memo(() => {
         db.ref('/feeds')
             .child(type + 's')
             .child(id)
-            .child('isPublish')
+            .child('isAdminApproved')
             .set(false)
             .then(() => {
-                history.push('/feed')
+                db.ref('/feeds')
+                    .child(type + 's')
+                    .child(id)
+                    .child('isAssetManagerApproved')
+                    .set(false)
+                    .then(() => {
+                        onNotification(id)
+                        history.push('/feed')
+                    })
             })
     }
     const onAdminApprove = (values: FormikValues) => {
@@ -325,7 +336,8 @@ const CreateFeed = React.memo(() => {
             }).then(() => {
                 if (notificationId) {
                     db.ref('/notification').child('/feeds').child(type + 's').child(notificationId).remove().then(() => {
-                        window.location.href = '/notifications'
+                        window.location.href = '#/notifications'
+                        window.location.reload()
                     })
                 } else {
                     db.ref('/notification').child('feeds').child(type + 's').once('value', function (snapshot) {
@@ -335,7 +347,7 @@ const CreateFeed = React.memo(() => {
                         for (let key in fObject) {
                             if (fObject[key].id === id) {
                                 db.ref('/notification').child('/feeds').child(type + 's').child(key).remove().then(() => {
-                                    window.location.href = '/content'
+                                    window.location.href = '#/content'
                                 })
                             }
                         }
