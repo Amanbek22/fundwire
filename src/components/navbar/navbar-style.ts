@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const NavbarWrapper = styled.div`
-  background: rgb(18,30,52);
+  background: #1c1c1c;
   color: white;
   padding: 33px 33px;
   height: 100vh;
@@ -12,10 +12,15 @@ export const NavbarWrapper = styled.div`
   &>.logoWrapper>div{
     margin-top: 25px;
     width: 100%;
-    height: 85px;
+    height: 135px;
     &>img{
       height: 100%;
     }
+  }
+  &>.language{
+    position: fixed;
+    bottom: 25px;
+    left: 33px;
   }
 `
 
@@ -35,8 +40,26 @@ export const NavList = styled.div`
     letter-spacing: 1px;
     transition: all 0.25s linear;
     cursor: pointer;
+    position:relative;
+    
+    &>.notification{
+       position: absolute;
+       right: 0;
+       top: -5px;
+       color: #121E34;
+       background: #f0db65;
+       border-radius: 50%;
+       width: 20px;
+       height: 20px;
+       text-align:center;
+       line-height: 20px;
+       font-size: 12px;
+    }
+    &>.plus{
+      font-size: 8px;
+    }
   }
   &>.active{
-      color: #43b9ea;
+      color: #feff04;
     }
 `

@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from "styled-components";
+import {useTranslation} from "react-i18next";
 
 const Wrapper = styled.div`
   position:relative;
@@ -25,10 +26,11 @@ const Wrapper = styled.div`
   }
 `
 
-function SearchInput() {
+const SearchInput:React.FC<any> = (props) => {
+    const {t} = useTranslation()
     return (
         <Wrapper>
-            <input type="text" placeholder={'Search'}/>
+            <input value={props.value} onChange={(e)=>props.onChange(e.target.value)} type="text" placeholder={t("assetManagerHomeScreen.search")}/>
         </Wrapper>
     );
 }

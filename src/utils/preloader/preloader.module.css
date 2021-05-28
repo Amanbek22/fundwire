@@ -21,9 +21,10 @@
     stroke-linecap: round;
 }
 .img{
-    width: 45px;
-    height: 45px;
+    width: 65px;
+    height: 65px;
     position: absolute;
+    filter: invert(0%) sepia(0%) saturate(7500%) hue-rotate(340deg) brightness(94%) contrast(106%);
 }
 circle {
     fill: none;
